@@ -1,0 +1,40 @@
+# --- OS / Editor junk ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# --- Logs ---
+logs
+*.log
+npm-debug.log* 
+
+# --- Environment files ---
+.env
+.env.*
+!.env.example
+
+# --- Dependency directories ---
+node_modules/
+vendor/
+
+# --- Build / dist ---
+dist/
+build/
+out/
+
+# --- Cache ---
+.cache/
+.tmp/
+.temp/
+
+# --- Test / coverage ---
+coverage/
+.nyc_output/
+pytest_cache/
+
+# --- Misc ---
+*.bak
+*.tmp

@@ -1,0 +1,18 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "DevVault",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Prashant Yadav",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "yargs": "^17.7.2",
+    "COMMENT":" this is npm package for the reading input from terminal "
+  }
+}
+
