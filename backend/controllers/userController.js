@@ -1,5 +1,3 @@
-// const { model } = require("mongoose")
-
 const getAllUsers = (req, res) => {
     res.send(
         "All users fetched!"

@@ -1,11 +1,16 @@
-const express = require("express"); 
+const express = require("express");
+
+const userRouter = require('./user.router')
+const repoRouter = require('./repo.router')
 
 const mainRouter = express.Router();
 
- app.get('/', (req, res) => {
-        res.send("Hello buddy !");
-    });
+mainRouter.use(userRouter);
+mainRouter.use(repoRouter);
 
+mainRouter.get('/', (req, res) => {
+    res.send("Hello buddy !");
+});
 
-    module.exports = mainRouter;
+module.exports = mainRouter;
 
