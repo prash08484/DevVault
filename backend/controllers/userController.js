@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { MongoClient } = require("mongodb");
-
+const { MongoClient, ReturnDocument } = require("mongodb");
 const dontenv = require("dotenv");
+const ObjectId = require('mongodb').ObjectId;
+
 dontenv.config();
 
 const uri = process.env.MONGODB_URI;
@@ -18,7 +19,7 @@ async function connectClient() {
         // wait till get connection 
         await client.connect();
     }
-}
+};
 
 async function signup(req, res) {
     const { username, password, email } = req.body;
@@ -91,25 +92,103 @@ async function login(req, res) {
     )
 };
 
-const getAllUsers = (req, res) => {
-    res.send(
-        "All users fetched!"
-    )
+async function getAllUsers(req, res) {
+    try {
+        // connetion established 
+        await connectClient();
+        const db = client.db("devVault");
+        const usersCollection = db.collection("users");
+
+        const users = await usersCollection.find({}).toArray();
+        // circular mongodb structure -> json  use toArray()
+
+        res.json(users);
+    }
+    catch (err) {
+        console.error("Error during Fetching : ", err.message);
+        res.send(500).send("Server Error");
+    }
 };
-const getuserProfile = (req, res) => {
-    res.send(
-        "Profile fetched!"
-    )
+
+async function getuserProfile(req, res) {
+    const currentId = req.params.id;
+
+    try {
+        await connectClient();
+        const db = client.db("devVault");
+        const usersCollection = db.collection("users");
+
+        // object id for converting string id to object 
+
+        const user = await usersCollection.findOne({
+            _id: new ObjectId(currentId)
+        });
+        if (!user) {
+            return res.status(404).json({ message: "User not Found" });
+        }
+        res.send(user);
+    }
+    catch (err) {
+        console.error("Error during Fetching : ", err.message);
+        res.send(500).send("Server Error");
+    }
 };
-const updateUserProfile = (req, res) => {
-    res.send(
-        "Profile Updated!"
-    )
+
+async function updateUserProfile(req, res) {
+    const currentId = req.params.id;
+    const { email, password } = req.body;
+    try {
+        await connectClient();
+        const db = client.db("devVault");
+        const usersCollection = db.collection("users");
+
+        let updateFileds = { email };
+        if (password) {
+            // hash pass before passing
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            updateFileds.password = hashedPassword;
+        }
+
+        const result = await usersCollection.findOneAndUpdate(
+            { _id: new ObjectId(currentId), },
+            { $set: updateFileds },
+            { ReturnDocument: "after" }
+        );
+
+        if (!result.value) {
+            return req.status(404).json({ message: "User Not Found ! " });
+        }
+        res.send(result.value);
+    }
+    catch (err) {
+        console.error("Error during Updating : ", err.message);
+        res.send(500).send("Server Error");
+    }
+
 };
-const deleteUserProfile = (req, res) => {
-    res.send(
-        "Profile deleted!"
-    )
+
+async function deleteUserProfile(req, res) {
+    const currentId = req.params.id;
+    try {
+        await connectClient();
+        const db = client.db("devVault");
+        const usersCollection = db.collection("users");
+
+        const result = await usersCollection.deleteOne({
+            _id: new ObjectId(currentId)
+        });
+
+        if (result.deletecount == 0) {
+            return req.status(404).json({ message: "User Not Found ! " });
+        }
+        res.json({ message: "User Profile Deleted " });
+    }
+    catch (err) {
+        console.error("Error during Deleting : ", err.message);
+        res.send(500).send("Server Error");
+    }
+
 };
 
 
