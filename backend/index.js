@@ -1,3 +1,4 @@
+// npm packages
 const express = require('express');
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -7,6 +8,11 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 
+// router 
+const mainRouter = require('./routes/main.router');
+
+
+// yargs or terminal input read 
 const yargs = require("yargs");
 const { hideBin } = require("yargs/helpers");
 const { initRepo } = require("./controllers/init");
@@ -76,9 +82,12 @@ function startServer() {
     // all the req. from any type of hit 
     app.use(cors({ origin: "*" }));
 
-    app.get('/', (req, res) => {
-        res.send("Hello buddy !");
-    });
+    // app.get('/', (req, res) => {
+    //     res.send("Hello buddy !");
+    // });
+
+    // redirect to mainRouter if home path
+    app.use("/",mainRouter); 
 
     // temporary user 
     let user = "test";
@@ -109,7 +118,7 @@ function startServer() {
         console.log("CURD operations called");
         // CRUD operations 
 
-        
+
     });
 
     // listen server 
