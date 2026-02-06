@@ -35,7 +35,7 @@ async function pullRepo() {
         console.log("All commits pulled From S3 BUCKET");
     }
     catch (err) {
-        console.log("Error during pulling repository: " + err);
+        console.log("Error during pulling repository: " , err);
     }
     console.log("Pull Repo");
 }
