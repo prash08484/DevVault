@@ -1,168 +1,142 @@
-# DevVault
+# 🛡️ DevVault: Architecture & System Design 
 
-DevVault is a developer collaboration platform that enables users to manage versioned code assets, store files securely in the cloud, and collaborate through social and repository-level features. The project focuses on building core systems behind code management, authentication, and scalable file handling using a modern MERN stack.
-
----
-
-## 🚀 Features
-
-* **Versioned Code Management**
-  Manage repositories with support for add, commit, revert, push, and pull operations, along with structured commit history.
-
-* **Cloud-based File Storage**
-  Repository files and versions are stored securely in **AWS S3**, while metadata and relationships are maintained in MongoDB.
-
-* **Authentication & Security**
-  Multi-provider authentication using **GitHub OAuth**, **Google OAuth**, and **email/password login**, secured with JWT-based session management.
-
-* **Developer Collaboration**
-  Social features including stars, followers/following, folder & file uploads, and activity feeds for repository interaction.
-
-* **Deployment & Hosting**
-  Frontend deployed on **Vercel**, backend hosted on cloud infrastructure with environment-based configuration.
+**DevVault** is a full-stack version control and repository management platform. Based on the project structure, it provides Git-like operations (init, add, commit, push, pull), issue tracking, and developer profiles with contribution heatmaps .
 
 ---
 
-## 🛠 Tech Stack
-
-### Frontend
-
-* React.js
-* Redux / Context API
-* Axios
-* Tailwind CSS / CSS Modules
-
-### Backend
-
-* Node.js
-* Express.js
-* MongoDB (Mongoose)
-* JWT Authentication
-
-### Cloud & Services
-
-* AWS S3 (file storage)
-* OAuth (GitHub & Google)
-* Vercel (frontend deployment)
+## 🏗️ Overall System Architecture (HLD)
+DevVault utilizes a modern decoupled Client-Server architecture.
+*   **Client (Frontend):** A Single Page Application (SPA) built with React and Vite .
+*   **API (Backend):** A Node.js RESTful API handling business logic, authentication, and version control (VCS) operations .
+*   **Storage & Cloud:** Employs a database (likely MongoDB via Mongoose) for application data (users, repos, issues) and AWS (via `aws-config.js`) for object/repository storage .
 
 ---
 
-## 🧩 System Overview
+## ⚙️ Backend System Design
 
-* **Metadata Layer**: Repository data, commit history, user relationships, and access control stored in MongoDB.
-* **Object Storage Layer**: Large files and versioned assets stored in AWS S3 to ensure scalability.
-* **API Layer**: RESTful services built with Express to handle repository actions, authentication, and collaboration.
+### 📦 Backend Dependencies
+| Category | Likely Technologies (Inferred) |
+| :--- | :--- |
+| **Runtime & Framework** | Node.js, Express.js |
+| **Database** | MongoDB (Mongoose models) |
+| **Cloud Provider** | AWS SDK (`aws-config.js`)  |
+| **Security** | JWT, bcrypt (Auth middlewares) |
 
----
+### 🗺️ Backend High-Level Design (HLD)
+The backend acts as an API Gateway that routes incoming HTTP requests through security middlewares before passing them to specific controllers. 
+1.  **User & Auth Module:** Manages registration, login, and access control.
+2.  **Repository Module:** Manages metadata for user repositories.
+3.  **VCS Engine:** Handles the heavy lifting of core version control commands (add, commit, push, pull, revert) .
+4.  **Issue Tracker:** Manages creation and state of repository issues .
 
-## 🔗 Dependency Graph
+### 🔬 Backend Low-Level Design (LLD)
+The backend follows a strict Model-View-Controller (MVC) directory pattern :
 
-The following diagram represents the high-level dependency and interaction flow between major components of DevVault:
-
-```
-[ Client (React) ]
-        |
-        |  HTTPS (REST APIs)
-        v
-[ API Gateway (Express.js) ]
-        |
-        |-- Auth & User Service
-        |       |- OAuth (GitHub / Google)
-        |       |- JWT Issuance & Validation
-        |
-        |-- Repository & Commit Service
-        |       |- Commit Metadata
-        |       |- Version History
-        |       |- Access Control
-        |
-        |-- File Upload Service
-        |       |- Presigned URLs
-        |       |- Multipart Uploads
-        |
-        v
-[ MongoDB ]  <---- Metadata, Users, Commits, Relations
-
-        |
-        v
-[ AWS S3 ]   <---- Versioned Files & Repository Objects
-
-[ Vercel ]  <---- Frontend Deployment (CI/CD)
-```
-
-**Key Design Notes**
-
-* Application logic is centralized in stateless Express services to allow horizontal scaling.
-* Large binary assets are decoupled from application storage and handled by AWS S3.
-* MongoDB stores only lightweight, query-optimized metadata and relationships.
-* Authentication is isolated from core repository logic to keep services modular.
+*   **1. Routing (`/backend/routes/`)** 
+    *   `main.router.js`: Central router orchestrating traffic.
+    *   `user.router.js`, `repo.router.js`, `issue.router.js`: Domain-specific API endpoints.
+*   **2. Middleware (`/backend/middleware/`)** 
+    *   `authMiddleware.js`: Verifies user sessions/tokens.
+    *   `authorizeMiddleware.js`: Handles Role-Based Access Control (RBAC) or repo ownership verification.
+*   **3. Controllers (`/backend/controllers/`)** 
+    *   *App Controllers:* `userController.js`, `repoController.js`, `issueController.js` (Handle CRUD operations).
+    *   *VCS Controllers:* Isolated business logic for Git-like operations: `init.js`, `add.js`, `commit.js`, `push.js`, `pull.js`, `revert.js`.
+*   **4. Data Models (`/backend/models/`)** 
+    *   `userModel.js`: Schema for user credentials and profile data.
+    *   `repoModel.js`: Schema for repository metadata (name, owner, visibility).
+    *   `issueModel.js`: Schema for bug tracking and tasks linked to repos.
+*   **5. Configuration (`/backend/config/`)** 
+    *   `aws-config.js`: AWS credentials and S3 bucket configurations for storing repository blobs/trees.
 
 ---
 
-## 🔐 Authentication Flow
+## 💻 Frontend Design
 
-1. User signs up via GitHub, Google, or email/password.
-2. Backend validates credentials and issues a JWT.
-3. JWT is used to authorize protected API routes.
-4. Secure file uploads are handled via signed requests to S3.
+### 📦 Frontend Dependencies
+| Category | Technologies (Inferred) |
+| :--- | :--- |
+| **Framework** | React, Vite  |
+| **Routing** | React Router (`Routes.jsx`)  |
+| **State Management**| React Context API (`authContext.jsx`)  |
+| **Styling** | Vanilla CSS (`.css` files per component)  |
 
----
+ 
+### 🔬 Design 
+The frontend is structured by feature components :
 
-## 📦 Installation & Setup
+*   **1. Core Application (`/frontend/src/`)** 
+    *   `main.jsx` & `App.jsx`: Application entry points, injecting global providers.
+    *   `Routes.jsx`: Defines the navigational map (e.g., mapping URLs to `Login`, `Dashboard`, etc.).
+    *   `authContext.jsx`: A React Context provider that wraps the app to provide global access to the user's authentication status and token.
+*   **2. Components (`/frontend/src/components/`)** 
+    *   **Auth Module:** `Login.jsx` and `Signup.jsx` (Form handling, API calls for token retrieval).
+    *   **User Module:** 
+        *   `Profile.jsx`: Displays user metadata and repository lists.
+        *   `HeatMap.jsx`: A visual component rendering user contribution activity (similar to GitHub's commit graph).
+    *   **Dashboard Module:** `Dashboard.jsx` (The central hub for users to view recent activity, issues, and repositories).
+    *   **Shared:** `Navbar.jsx` (Global navigation header).
+*   **3. Assets (`/frontend/src/assets/`)** 
+    *   Contains static resources like `github-mark-white.svg` and `react.svg`.
 
+
+###
+
+## 🚀 Getting Started (Initialization)
+
+Follow these steps to set up and run the project locally.
+
+### 1. Clone the Repository
 ```bash
-# Clone the repository
-git clone https://github.com/prash08484/DevVault.git
+git clone <repository-url>
 cd DevVault
+```
 
-# Install dependencies
+### 2. Backend Setup
+Navigate to the backend directory, install dependencies, and start the server .
+```bash
+cd backend
 npm install
-
-# Start backend
-npm run server
-
-# Start frontend
-npm run client
+# Start the development server (e.g., using nodemon or standard node)
+npm run dev
 ```
 
-Create a `.env` file with the following:
-
-```
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-AWS_ACCESS_KEY=your_aws_key
-AWS_SECRET_KEY=your_aws_secret
-AWS_BUCKET_NAME=your_bucket_name
-GITHUB_CLIENT_ID=your_github_client_id
-GOOGLE_CLIENT_ID=your_google_client_id
+### 3. Frontend Setup
+Navigate to the frontend directory, install dependencies, and start the Vite development server .
+```bash
+cd ../frontend
+npm install
+# Start the Vite React development server
+npm run dev
 ```
 
 ---
 
-## ✨ Design Highlights & Interesting Bits
+## 🔐 Environment Variables (.env)
 
-* **Metadata vs Object Storage Split**
-  DevVault intentionally separates lightweight metadata (users, repos, commits, relations) from heavy binary assets. MongoDB handles fast queries and relationships, while AWS S3 stores versioned file objects for durability and scale.
+The backend requires a `.env` file to securely store database credentials, API keys, and secrets . 
 
-* **Commit as a First-Class Entity**
-  Each commit is treated as an immutable record with parent references, enabling clean history traversal, revert operations, and future extensibility (branches, tags).
+Create a `.env` file in the `backend/` directory (`DevVault/backend/.env`) and populate it with the following configuration variables :
 
-* **Secure-by-Design Uploads**
-  File uploads never pass through the backend server directly. Instead, presigned URLs are used to upload straight to S3, reducing server load and improving security.
+```env
+# Server Configuration
+PORT=5000
+NODE_ENV=development
 
-* **Stateless API Architecture**
-  All backend services are stateless, relying on JWTs for authentication. This enables easy horizontal scaling and smooth cloud deployment.
+# Database (MongoDB)
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/devvault
 
-* **Deployment-Aware Development**
-  The project is built with production deployment in mind from day one, using environment-based configuration and CI-connected frontend deployments.
+# Security / Authentication
+JWT_SECRET=your_super_secret_jwt_key
+JWT_EXPIRES_IN=7d
 
----
+# AWS Configuration (for aws-config.js)
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_REGION=your_aws_region
+AWS_BUCKET_NAME=your_s3_bucket_name
+```
+*(Note: Do not commit your actual `.env` file to version control. It should be ignored via `.gitignore`.)*
 
-## 📈 Learning Outcomes
-
-* Designing RESTful APIs with clean data models
-* Handling large file uploads using cloud object storage
-* Implementing OAuth and JWT-based authentication
-* Structuring scalable full-stack applications
 
 --- 
 
