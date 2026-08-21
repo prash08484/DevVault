@@ -13,8 +13,8 @@ let client;
 async function connectClient() {
     if (!client) {
         client = new MongoClient(uri, {
-            useNewUrlParset: true,
-            unseUnifiedTopology: true
+            useNewUrlParser: true,
+            useUnifiedTopology: true
         });
         // wait till get connection 
         await client.connect();
@@ -26,7 +26,7 @@ async function signup(req, res) {
     try {
         await connectClient();
         // update it from mongodb
-        const db = client.db("devVault");
+        const db = client.db("devvault");
         const userCollection = db.collection("users");
 
         // check is user alreday exit or not 
@@ -44,10 +44,10 @@ async function signup(req, res) {
         const newUesr = {
             username,
             password: hashedPassword,
-            email,
-            rempositories: [],
+            email, 
+            repositories: [],
             followedUsers: [],
-            starRepo: []
+            starRepos: []
         }
         const result = await userCollection.insertOne(newUesr);
 
@@ -67,7 +67,7 @@ async function login(req, res) {
     const { email, password } = req.body;
     try {
         await connectClient();
-        const db = client.db('devVault');
+        const db = client.db('devvault');
         const usersCollection = db.collection("users");
 
         // check is user is avl 
@@ -82,23 +82,23 @@ async function login(req, res) {
 
         // avl then refresh the jwt token 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
-        res.status(201).json({
+        res.json({
             token,
-            userId: result.insertedId
+            userId: user._id
         });
     }
     catch (err) {
 
         console.log("Error during login : ", err.message);
         res.status(500).send("Server Error");
-    } 
+    }
 };
 
 async function getAllUsers(req, res) {
     try {
         // connetion established 
         await connectClient();
-        const db = client.db("devVault");
+        const db = client.db("devvault");
         const usersCollection = db.collection("users");
 
         const users = await usersCollection.find({}).toArray();
@@ -117,7 +117,7 @@ async function getuserProfile(req, res) {
 
     try {
         await connectClient();
-        const db = client.db("devVault");
+        const db = client.db("devvault");
         const usersCollection = db.collection("users");
 
         // object id for converting string id to object 
@@ -141,7 +141,7 @@ async function updateUserProfile(req, res) {
     const { email, password } = req.body;
     try {
         await connectClient();
-        const db = client.db("devVault");
+        const db = client.db("devvault");
         const usersCollection = db.collection("users");
 
         let updateFileds = { email };
@@ -154,12 +154,12 @@ async function updateUserProfile(req, res) {
 
         const updatedUser = await usersCollection.findOneAndUpdate(
             { _id: new ObjectId(currentId) },
-            { $set: updateFields },
+            { $set: updateFileds },
             { returnDocument: "after" }
         );
 
         if (!updatedUser.value) {
-            return req.status(404).json({ message: "User Not Found ! " });
+            return res.status(404).json({ message: "User Not Found ! " });
         }
         res.send(updatedUser.value);
     }
@@ -174,7 +174,7 @@ async function deleteUserProfile(req, res) {
     const currentId = req.params.id;
     try {
         await connectClient();
-        const db = client.db("devVault");
+        const db = client.db("devvault");
         const usersCollection = db.collection("users");
 
         const result = await usersCollection.deleteOne({

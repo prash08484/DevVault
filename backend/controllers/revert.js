@@ -28,7 +28,7 @@ async function revertRepo(commitID) {
         console.log(`Commit ${commitID} reverted successfully !`);
     }
     catch (err) {
-        console.log("Unable to Revert : ", errerr.message);
+        console.log("Unable to Revert : ", err.message);
     }
 }
 

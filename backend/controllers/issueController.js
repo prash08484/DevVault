@@ -17,12 +17,12 @@ async function createIssue(req, res) {
         await issue.save();
         res.status(201).json(issue);
     } catch (err) {
-        console.err("Error during issue creation : ", err.message);
+        console.log("Error during issue creation : ", err.message);
         res.status(500).send("Server Error");
     }
 };
 
-async function updateIssueById(req, res) { 
+async function updateIssueById(req, res) {
 
     const { id } = req.params;
     const { title, description, status } = req.body;
@@ -37,14 +37,17 @@ async function updateIssueById(req, res) {
         issue.status = status;
 
         await issue.save();
-        res.status(200).json(issue, { messsge: "Issue Updated Successfully !" });
+        res.status(200).json({
+            message: "Issue Updated Successfully !",
+            issue
+        }); 
 
     } catch (err) {
-        console.err("Error during issue updation : ", err.message);
+        console.log("Error during issue updation : ", err.message);
         res.status(500).send("Server Error");
     }
 };
-async function deleteIssueById(req, res) { 
+async function deleteIssueById(req, res) {
 
     const { id } = req.params;
 
@@ -55,12 +58,12 @@ async function deleteIssueById(req, res) {
         }
         res.json({ messsge: "Issue Deleted Successfully !" });
     } catch (err) {
-        console.err("Error during issue deletion : ", err.message);
+        console.log("Error during issue deletion : ", err.message);
         res.status(500).send("Server Error");
     }
 };
 
-async function getAllIssues(req, res) { 
+async function getAllIssues(req, res) {
 
     const { id } = req.params;
     try {
@@ -70,12 +73,12 @@ async function getAllIssues(req, res) {
         }
         res.status(200).json(issues);
     } catch (err) {
-        console.err("Error during fetching issue : ", err.message);
+        console.log("Error during fetching issue : ", err.message);
         res.status(500).send("Server Error");
     }
 };
 
-async function getIssueById(req, res) { 
+async function getIssueById(req, res) {
 
     const { id } = req.params;
     try {
@@ -86,7 +89,7 @@ async function getIssueById(req, res) {
         res.json(issue);
 
     } catch (err) {
-        console.err("Error during fetching issue : ", err.message);
+        console.log("Error during fetching issue : ", err.message);
         res.status(500).send("Server Error");
     }
 };

@@ -33,7 +33,7 @@ async function createRepository(req, res) {
         });
 
     } catch (err) {
-        console.err("Error during repository creation : ", err.message);
+        console.log("Error during repository creation : ", err.message);
         res.status(500).send("Server Error");
     }
 };
@@ -52,7 +52,7 @@ async function getAllRepositories(req, res) {
         res.json(repository);
 
     } catch (err) {
-        console.err("Error during fetching repository  : ", err.message);
+        console.log("Error during fetching repository  : ", err.message);
         res.status(500).send("Server Error");
     }
 
@@ -65,12 +65,12 @@ async function fetchRepositoriesById(req, res) {
     try {
         const repository = await Repository.find({ _id: id })
             .populate("owner")
-            .populate("issues")
-            .toArray();
+            .populate("issues");
+
         res.json(repository);
 
     } catch (err) {
-        console.err("Error during fetching repository : ", err.message);
+        console.log("Error during fetching repository : ", err.message);
         res.status(500).send("Server Error");
     }
 };
@@ -82,21 +82,20 @@ async function fetchRepositoriesByName(req, res) {
     try {
         const repository = await Repository.find({ name })
             .populate("owner")
-            .populate("issues")
-            .toArray();
+            .populate("issues");
 
         res.json(repository);
 
     } catch (err) {
-        console.err("Error during fetching repositiory : ", err.message);
+        console.log("Error during fetching repositiory : ", err.message);
         res.status(500).send("Server Error");
     }
 };
 
-async function fetchRepositoriesForCurrentUser(req, res) {
-    const userId = req.user;
-
+async function fetchRepositoriesForCurrentUser(req, res) { 
+    
     try {
+        const { userId } = req.params; 
         const repositories = await Repository.find({ owner: userId });
 
         if (!repositories || repositories.length == 0) {
