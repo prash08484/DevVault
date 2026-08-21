@@ -51,8 +51,11 @@ async function signup(req, res) {
         }
         const result = await userCollection.insertOne(newUesr);
 
-        const token = jwt.sign({ id: result.insertId }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
-        res.json(token);
+        const token = jwt.sign({ id: result.insertedId }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
+        res.status(201).json({
+            token,
+            userId: result.insertedId
+        });
     }
     catch (err) {
         console.log("Error during signup ", err.message);
@@ -79,17 +82,16 @@ async function login(req, res) {
 
         // avl then refresh the jwt token 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
-        res.json({ token, userId: user._id });
+        res.status(201).json({
+            token,
+            userId: result.insertedId
+        });
     }
     catch (err) {
 
-        console.error("Error during login : ", err.message);
-        res.send(500).send("Server Error");
-
-    }
-    res.send(
-        "logging up!"
-    )
+        console.log("Error during login : ", err.message);
+        res.status(500).send("Server Error");
+    } 
 };
 
 async function getAllUsers(req, res) {
@@ -105,8 +107,8 @@ async function getAllUsers(req, res) {
         res.json(users);
     }
     catch (err) {
-        console.error("Error during Fetching : ", err.message);
-        res.send(500).send("Server Error");
+        console.log("Error during Fetching : ", err.message);
+        res.status(500).send("Server Error");
     }
 };
 
@@ -129,8 +131,8 @@ async function getuserProfile(req, res) {
         res.send(user);
     }
     catch (err) {
-        console.error("Error during Fetching : ", err.message);
-        res.send(500).send("Server Error");
+        console.log("Error during Fetching : ", err.message);
+        res.status(500).send("Server Error");
     }
 };
 
@@ -150,20 +152,20 @@ async function updateUserProfile(req, res) {
             updateFileds.password = hashedPassword;
         }
 
-        const result = await usersCollection.findOneAndUpdate(
-            { _id: new ObjectId(currentId), },
-            { $set: updateFileds },
-            { ReturnDocument: "after" }
+        const updatedUser = await usersCollection.findOneAndUpdate(
+            { _id: new ObjectId(currentId) },
+            { $set: updateFields },
+            { returnDocument: "after" }
         );
 
-        if (!result.value) {
+        if (!updatedUser.value) {
             return req.status(404).json({ message: "User Not Found ! " });
         }
-        res.send(result.value);
+        res.send(updatedUser.value);
     }
     catch (err) {
-        console.error("Error during Updating : ", err.message);
-        res.send(500).send("Server Error");
+        console.log("Error during Updating : ", err.message);
+        res.status(500).send("Server Error");
     }
 
 };
@@ -179,14 +181,14 @@ async function deleteUserProfile(req, res) {
             _id: new ObjectId(currentId)
         });
 
-        if (result.deletecount == 0) {
-            return req.status(404).json({ message: "User Not Found ! " });
+        if (result.deletedCount == 0) {
+            return res.status(404).json({ message: "User Not Found ! " });
         }
         res.json({ message: "User Profile Deleted " });
     }
     catch (err) {
-        console.error("Error during Deleting : ", err.message);
-        res.send(500).send("Server Error");
+        console.log("Error during Deleting : ", err.message);
+        res.status(500).send("Server Error");
     }
 
 };

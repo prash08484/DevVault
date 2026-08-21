@@ -24,7 +24,7 @@ async function commitRepo(message) {
         await fs.writeFile(
             path.join(commitDir, "commit.json"), JSON.stringify(
                 {
-                    message, date: new Date().toISOString
+                    message, date: new Date().toISOString()
                 }
             )
         );
@@ -33,7 +33,7 @@ async function commitRepo(message) {
 
     } catch (err) {
 
-        console.log("Error commiting the files : ", err);
+        console.log("Error commiting the files : ", err.message);
     } 
 }
 

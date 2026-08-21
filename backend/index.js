@@ -58,7 +58,10 @@ yargs(hideBin(process.argv))
             describe: "Commit ID to revert to",
             type: "string",
         });
-    }, revertRepo)
+    }, (argv) => {
+        revertRepo(argv.commitId);
+    }
+)
     .demandCommand(1, "You need atleast one commnand").help().argv;
 
 // adding server logic 
@@ -75,19 +78,14 @@ function startServer() {
     // db connect
     mongoose
         .connect(mongoURI)
-        .then(() => console.log("mongoDB connected !")
-            .catch((err) => console.error("Unable to connect: ", err))
-        );
+        .then(() => console.log("MongoDB connected!"))
+        .catch((err) => console.error("Unable to connect:", err));
 
     // all the req. from any type of hit 
     app.use(cors({ origin: "*" }));
 
-    // app.get('/', (req, res) => {
-    //     res.send("Hello buddy !");
-    // });
-
     // redirect to mainRouter if home path
-    app.use("/",mainRouter); 
+    app.use("/", mainRouter);
 
     // temporary user 
     let user = "test";
@@ -104,10 +102,7 @@ function startServer() {
     // setup socket 
     io.on("connection", (socket) => {
         socket.on("joinRoom", (userID) => {
-            user = userID;
-            console.log("======");
-            console.log(user);
-            console.log("======");
+            user = userID; 
             socket.join(userID);
         });
     });
@@ -117,7 +112,6 @@ function startServer() {
     db.once("open", async () => {
         console.log("CURD operations called");
         // CRUD operations 
-
 
     });
 

@@ -8,7 +8,7 @@ const IssueSchema = new Schema({
     },
     description: {
         type: String,
-        requried: true,
+        required: true,
     },
     status: {
         type: String,
@@ -17,8 +17,8 @@ const IssueSchema = new Schema({
     },
     repository: {
         type: Schema.Types.ObjectId,
-        ref: "Repositiory",
-        requried: true,
+        ref: "Repository",
+        required: true,
     },
 });
 

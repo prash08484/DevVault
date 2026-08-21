@@ -16,14 +16,19 @@ async function revertRepo(commitID) {
         const files = await readdir(commitDir);
         const parentDir = path.resolve(repoPath, "..");
 
-        // trace files
+        // trace files 
         for (const file of files) {
-            await copyFile(path.join(commitDir, file), path.join(parentDir, file));
+            if (file === "commit.json") continue;
+
+            await copyFile(
+                path.join(commitDir, file),
+                path.join(parentDir, file)
+            );
         }
         console.log(`Commit ${commitID} reverted successfully !`);
     }
     catch (err) {
-        console.log("Unable to Revert : ", err);
+        console.log("Unable to Revert : ", errerr.message);
     }
 }
 

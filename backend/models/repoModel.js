@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const RepositorySchema = new Schema({
     name: {
         type: String,
-        requried: true,
+        required: true,
         unique: true,
     },
     description: {

@@ -12,9 +12,8 @@ async function addRepo(filePath) {
         console.log(`File ${fileName} added to the staging area!`);
     }
     catch (err) {
-        console.error("Error adding file : ", err);
-    }
-    console.log("Add Repo");
+        console.log("Error adding file : ", err.message);
+    } 
 }
 
 module.exports = { addRepo };

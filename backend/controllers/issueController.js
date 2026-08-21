@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
-const Repositiory = require('../models/repoModel');
+const Repository = require('../models/repoModel');
 const User = require('../models/userModel');
 const Issue = require('../models/issueModel');
 
 
 async function createIssue(req, res) {
-    // res.send("Issue created");
     const { title, description } = req.body;
     const { id } = req.params;
 
@@ -13,7 +12,7 @@ async function createIssue(req, res) {
         const issue = new Issue({
             title,
             description,
-            repositiory: id,
+            repository: id,
         });
         await issue.save();
         res.status(201).json(issue);
@@ -23,10 +22,10 @@ async function createIssue(req, res) {
     }
 };
 
-async function updateIssueById(req, res) {
-    // res.send("Update Issue by Id !");
+async function updateIssueById(req, res) { 
+
     const { id } = req.params;
-    const { title, description, statsus } = req.body;
+    const { title, description, status } = req.body;
 
     try {
         const issue = await Issue.findById(id);
@@ -45,8 +44,8 @@ async function updateIssueById(req, res) {
         res.status(500).send("Server Error");
     }
 };
-async function deleteIssueById(req, res) {
-    // res.send("Delete Issue by Id !");
+async function deleteIssueById(req, res) { 
+
     const { id } = req.params;
 
     try {
@@ -61,11 +60,11 @@ async function deleteIssueById(req, res) {
     }
 };
 
-async function getAllIssues(req, res) {
-    // res.send("All Issues geted !"); 
+async function getAllIssues(req, res) { 
+
     const { id } = req.params;
     try {
-        const issues = await Issue.findById({ repositiory: id });
+        const issues = await Issue.find({ repository: id });
         if (!issues) {
             return res.status(404).json({ error: "Issue Not Found !" });
         }
@@ -76,8 +75,8 @@ async function getAllIssues(req, res) {
     }
 };
 
-async function getIssueById(req, res) {
-    // res.send("Issues geted by Id ! ");
+async function getIssueById(req, res) { 
+
     const { id } = req.params;
     try {
         const issue = await Issue.findById(id);

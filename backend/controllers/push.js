@@ -6,7 +6,7 @@ async function pushRepo() {
 
     // extract all the paths req. 
     const repoPath = path.resolve(process.cwd(), ".devGit");
-    const commitsPath = path.json(repoPath, "commits");
+    const commitsPath = path.join(repoPath, "commits");
 
     try {
         const commitDirs = await fs.readdir(commitsPath);
@@ -32,7 +32,7 @@ async function pushRepo() {
         console.log("All commits pushed to S3");
     }
     catch (err) {
-        console.error("Error pusing to S3: ", err);
+        console.log("Error pusing to S3: ", err.message);
     }
 }
 
